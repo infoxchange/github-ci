@@ -26,11 +26,11 @@ jobs:
 
       - name: Get app version
         id: get-app-version
-        uses: infoxchange/github-ci/actions/get-app-version
+        uses: infoxchange/github-ci/actions/get-app-version@main
 
       - name: Load docker image
         id: load-docker-image
-        uses: infoxchange/github-ci/actions/setup-docker-image
+        uses: infoxchange/github-ci/actions/setup-docker-image@main
         with:
           target: ${{ inputs.image-target }}
           build-args: |
