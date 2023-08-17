@@ -48,9 +48,8 @@ jobs:
         if: ${{ inputs.docker-path-to-copy-from }}
         run: |
           CONTAINER_ID=$( \
-            docker create -t ${{ steps.setup-docker-image.outputs.image-name }} \
-              ${{ inputs.additional-run-args }} \
-              ${{ inputs.command }} \
+            docker create -t ${{ inputs.additional-run-args }} ${{ steps.setup-docker-image.outputs.image-name }} \
+              ${{ inputs.command }}
           )
           docker start -a "$CONTAINER_ID" && exitCode=$? || exitCode=$?
           docker cp "$CONTAINER_ID:${{ inputs.docker-path-to-copy-from }}" \

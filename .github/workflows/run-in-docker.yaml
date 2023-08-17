@@ -38,6 +38,5 @@ jobs:
         shell: bash
         if: ${{ ! inputs.docker-path-to-copy-from }}
         run: |
-          docker run --rm -t ${{ steps.setup-docker-image.outputs.image-name }} \
-            ${{ inputs.additional-run-args }} \
+          docker run --rm -t ${{ inputs.additional-run-args }} ${{ steps.setup-docker-image.outputs.image-name }} \
             ${{ inputs.command }}
