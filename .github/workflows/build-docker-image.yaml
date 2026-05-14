@@ -3,6 +3,10 @@ name: Build docker image to ensure all steps exist in the cache
 on:
   workflow_call:
     inputs:
+      workflow-ref:
+        description: 'The ref of infoxchange/github-ci to use for actions'
+        required: true
+        type: string
       image-target:
         type: string
     outputs:
@@ -23,13 +27,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Checkout github-ci actions
+        uses: actions/checkout@v6
+        with:
+          repository: infoxchange/github-ci
+          ref: ${{ inputs.workflow-ref }}
+          path: .infoxchange-github-ci
+
       - name: Get app version
         id: get-app-version
-        uses: infoxchange/github-ci/actions/get-app-version@main
+        uses: ./.infoxchange-github-ci/actions/get-app-version
 
       - name: Build docker image
         id: build-docker-image
-        uses: infoxchange/github-ci/actions/setup-docker-image@main
+        uses: ./.infoxchange-github-ci/actions/setup-docker-image
         with:
           load-image: false
           target: ${{ inputs.image-target }}
