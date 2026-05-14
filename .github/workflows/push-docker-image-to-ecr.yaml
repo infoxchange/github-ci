@@ -29,6 +29,11 @@ jobs:
         id: get-app-version
         uses: infoxchange/github-ci/actions/get-app-version@main
 
+      - name: Print info
+        shell: bash
+        run: |
+          echo "Preparing to push tag: ${{ steps.get-app-version.outputs.app-version }}"
+
       - name: Load docker image
         id: load-docker-image
         uses: infoxchange/github-ci/actions/setup-docker-image@main
@@ -57,5 +62,8 @@ jobs:
           docker tag ${{ steps.load-docker-image.outputs.image-name }}:latest $ECR_REGISTRY/${{ inputs.ecr-image-name }}:${{ steps.get-app-version.outputs.app-version }}
           docker push $ECR_REGISTRY/${{ inputs.ecr-image-name }}:${{ steps.get-app-version.outputs.app-version }}
 
-      - name: Create image pushed notice
-        run: 'echo "::notice title=Image has been pushed to ECR::Image tag: ${{ steps.get-app-version.outputs.app-version }}"'
+      - name: Print tag info
+        run: |
+          prefix_message="Pushed new tag to ECR:"
+          echo -e "### 🏷️ $prefix_message \n\`\`\`\n${{ steps.get-app-version.outputs.app-version }}\n\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo -e "$prefix_message\n\e[1m${{ steps.get-app-version.outputs.app-version }}\e[0m"

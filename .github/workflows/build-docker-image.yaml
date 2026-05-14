@@ -17,7 +17,7 @@ jobs:
     name: Build docker image
     runs-on: ubuntu-latest
     outputs:
-      image-name: ${{ steps.build-docker-image.outputs.app-version }}
+      image-name: ${{ steps.build-docker-image.outputs.image-name }}
       app-version: ${{ steps.get-app-version.outputs.app-version }}
     steps:
       - name: Checkout repository
