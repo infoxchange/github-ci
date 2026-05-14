@@ -21,7 +21,7 @@ jobs:
       app-version: ${{ steps.get-app-version.outputs.app-version }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Get app version
         id: get-app-version
