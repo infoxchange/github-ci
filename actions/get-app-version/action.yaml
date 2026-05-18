@@ -12,7 +12,7 @@ runs:
     - name: Get app version
       id: get-app-version
       shell: bash
-      run: echo "app-version=${{ github.ref_name }}-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      run: echo "app-version=$(echo '${{ github.ref_name }}' | tr '/' '-')-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
     - name: Print app version
       shell: bash

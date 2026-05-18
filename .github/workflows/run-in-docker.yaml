@@ -3,6 +3,10 @@ name: Run command in docker container
 on:
   workflow_call:
     inputs:
+      workflow-ref:
+        description: 'The ref of infoxchange/github-ci to use for actions'
+        required: true
+        type: string
       image-target:
         description: 'The build step target of the docker image'
         type: string
@@ -20,15 +24,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
+
+      - name: Checkout github-ci actions
+        uses: actions/checkout@v6
+        with:
+          repository: infoxchange/github-ci
+          ref: ${{ inputs.workflow-ref }}
+          path: .infoxchange-github-ci
 
       - name: Get app version
         id: get-app-version
-        uses: infoxchange/github-ci/actions/get-app-version@main
+        uses: ./.infoxchange-github-ci/actions/get-app-version
 
       - name: Setup docker image
         id: setup-docker-image
-        uses: infoxchange/github-ci/actions/setup-docker-image@main
+        uses: ./.infoxchange-github-ci/actions/setup-docker-image
         with:
           target: ${{ inputs.image-target }}
           build-args: |

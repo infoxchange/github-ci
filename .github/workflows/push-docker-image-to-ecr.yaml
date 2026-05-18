@@ -3,6 +3,10 @@ name: Run command in docker container
 on:
   workflow_call:
     inputs:
+      workflow-ref:
+        description: 'The ref of infoxchange/github-ci to use for actions'
+        required: true
+        type: string
       image-target:
         description: 'The build step target of the docker image'
         type: string
@@ -23,22 +27,34 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
+
+      - name: Checkout github-ci actions
+        uses: actions/checkout@v6
+        with:
+          repository: infoxchange/github-ci
+          ref: ${{ inputs.workflow-ref }}
+          path: .infoxchange-github-ci
 
       - name: Get app version
         id: get-app-version
-        uses: infoxchange/github-ci/actions/get-app-version@main
+        uses: ./.infoxchange-github-ci/actions/get-app-version
+
+      - name: "ℹ️ Print info"
+        shell: bash
+        run: |
+          echo -e "Preparing to push tag: \e[1m${{ steps.get-app-version.outputs.app-version }}\e[0m"
 
       - name: Load docker image
         id: load-docker-image
-        uses: infoxchange/github-ci/actions/setup-docker-image@main
+        uses: ./.infoxchange-github-ci/actions/setup-docker-image
         with:
           target: ${{ inputs.image-target }}
           build-args: |
             APP_VERSION=${{ steps.get-app-version.outputs.app-version }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           aws-region: ap-southeast-2
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GithubActionsOIDC
@@ -46,7 +62,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: 'true'
 
@@ -57,5 +73,8 @@ jobs:
           docker tag ${{ steps.load-docker-image.outputs.image-name }}:latest $ECR_REGISTRY/${{ inputs.ecr-image-name }}:${{ steps.get-app-version.outputs.app-version }}
           docker push $ECR_REGISTRY/${{ inputs.ecr-image-name }}:${{ steps.get-app-version.outputs.app-version }}
 
-      - name: Create image pushed notice
-        run: 'echo "::notice title=Image has been pushed to ECR::Image tag: ${{ steps.get-app-version.outputs.app-version }}"'
+      - name: Print tag info
+        run: |
+          prefix_message="Pushed new tag to ECR:"
+          echo -e "### 🏷️ $prefix_message \n\`\`\`\n${{ steps.get-app-version.outputs.app-version }}\n\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo -e "$prefix_message\n\e[1m${{ steps.get-app-version.outputs.app-version }}\e[0m"
